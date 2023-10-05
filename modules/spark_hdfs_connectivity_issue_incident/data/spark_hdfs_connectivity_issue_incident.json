@@ -1,0 +1,122 @@
+{
+  "name": "spark_hdfs_connectivity_issue_incident",
+  "description": "The Spark HDFS Connectivity Issue Incident refers to a situation where there is a problem with the connectivity between Apache Spark and Hadoop Distributed File System (HDFS). This can result in Spark being unable to access data stored in HDFS or facing performance issues due to slow connectivity. This type of incident can be caused by various factors such as network issues, misconfiguration, or software bugs. It can impact the overall functioning of Spark-based applications and require immediate attention to ensure smooth operations.",
+  "params": [
+    {
+      "name": "HDFS_SERVICE_NAME",
+      "value": ""
+    },
+    {
+      "name": "SPARK_SERVICE_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMENODE",
+      "value": ""
+    },
+    {
+      "name": "PORT",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_HADOOP_CONFIGURATION_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "PATH_TO_SPARK_CONFIGURATION_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Spark HDFS Connectivity Issue Incident\nThe Spark HDFS Connectivity Issue Incident refers to a situation where there is a problem with the connectivity between Apache Spark and Hadoop Distributed File System (HDFS). This can result in Spark being unable to access data stored in HDFS or facing performance issues due to slow connectivity. This type of incident can be caused by various factors such as network issues, misconfiguration, or software bugs. It can impact the overall functioning of Spark-based applications and require immediate attention to ensure smooth operations."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Spark is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status spark | grep 'Active: active (running)' || echo 'Spark is not running'`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if HDFS is running"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status hdfs | grep 'Active: active (running)' || echo 'HDFS is not running'`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Spark can connect to HDFS via Hadoop command line"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `spark-submit --class org.apache.spark.examples.SparkPi --master yarn --deploy-mode client --driver-memory 1g --executor-memory 1g --executor-cores 1 --num-executors 1 /path/to/examples.jar yarn-client hdfs://${NAMENODE}:${PORT}/ || echo 'Spark cannot connect to HDFS'`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if HDFS can be accessed via Hadoop command line"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `hdfs dfs -ls hdfs://${NAMENODE}:${PORT}/ || echo 'Cannot access HDFS via Hadoop command line'`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Incorrect configuration of Spark or HDFS settings"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_config_check($PATH_TO_HADOOP_CONFIGURATION_DIRECTORY, $PATH_TO_SPARK_CONFIGURATION_DIRECTORY)"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Try restarting the Spark and HDFS services to see if that resolves the connectivity issue."
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_restart_spark_hdfs_services($HDFS_SERVICE_NAME, $SPARK_SERVICE_NAME)"
+    }
+  ]
+}
